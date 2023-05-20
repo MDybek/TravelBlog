@@ -3,10 +3,10 @@ from blog_api.views import *
 
 urlpatterns = [
     # Dla niezalogowanego gościa
-    path('posts/', BlogPostListView.as_view(), name='post-list'),  # Przeglądanie wpisów blogowych
-    path('posts/<int:pk>/', BlogPostDetailView.as_view(), name='post-detail'),  # Podgląd szczegółów wpisu
-    path('tags/', TagListView.as_view(), name='tag-list'),  # Przeglądanie tagów
-    path('search/', SearchView.as_view(), name='search'),  # Wyszukiwanie
+    path('posts', BlogPostsListView.as_view(), name='post-list'),  # Przeglądanie wpisów blogowych
+    path('posts/<int:pk>', BlogPostDetailView.as_view(), name='post-detail'),  # Podgląd szczegółów wpisu
+    path('tags', TagListView.as_view(), name='tag-list'),  # Przeglądanie tagów
+    path('search', SearchView.as_view(), name='search'),  # Wyszukiwanie
 
     # Dla zalogowanych użytkowników
     path('register/', UserRegistrationView.as_view(), name='register'),  # Rejestracja

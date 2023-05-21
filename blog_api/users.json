@@ -1,0 +1,14 @@
+[
+  {
+    "model": "blog_api.user",
+    "pk": 1,
+    "fields": {
+      "username": "janek123",
+      "first_name": "Jan",
+      "last_name": "Kowalski",
+      "email": "janek@example.com",
+      "password": "pbkdf2_sha256$216000$JaTKRGZ5mTnZ$dVW5sfGfBUdMb1IHHCJQ5Z3Z2Z",
+      "date_joined": "2023-05-19T10:00:00Z"
+    }
+  }
+]

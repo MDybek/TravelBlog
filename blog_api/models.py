@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 
 
 class User(AbstractUser):
+    username = models.CharField(max_length=30, unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField(unique=True)
@@ -28,7 +29,7 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.username
+        return self.first_name.join(" ".join(self.last_name))
 
 
 class Post(models.Model):
@@ -37,6 +38,7 @@ class Post(models.Model):
     content = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    image = models.CharField(max_length=200)
 
     def __str__(self):
         return self.title

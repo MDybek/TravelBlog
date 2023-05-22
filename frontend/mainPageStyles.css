@@ -108,6 +108,7 @@ header {
 }
 
 .tile {
+    position: relative;
     width: calc(50% - 150px);
     height: 35%;
     background-color: #D7FFF0;
@@ -115,6 +116,30 @@ header {
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+.tile-container .tile:not(:last-child) {
+    margin-bottom: -90px;
+}
+
+.tile .title {
+    position: absolute;
+    left: 30px;
+}
+
+.tile .created-at {
+    position: absolute;
+    right: 10px;
+    font-size: 15px;
+}
+
+.tile img {
+    width: 70%;
+    height: 70%;
+    object-fit: cover;
+    display: block;
+    margin: 60px auto 10px;
+}
+
 
 @media screen and (max-width: 768px) {
     .tile {

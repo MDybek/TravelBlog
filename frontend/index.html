@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>TravelBlog</title>
-  <link rel="stylesheet" href="mainPageStyles.css">
+    <meta charset="UTF-8">
+    <title>TravelBlog</title>
+    <link rel="stylesheet" href="mainPageStyles.css">
 </head>
 <body>
-  <header>
+<header>
     <div class="logo">TravelBlog</div>
     <div class="search-bar">
         <label>
@@ -15,28 +15,23 @@
         <button type="submit">Szukaj</button>
     </div>
     <div class="account">
-      <div class="profile-image">
-        <!-- Placeholder image or user profile image -->
-        <img src="basic_user.png" alt="Profile Image">
-      </div>
-      <div class="user-info">
-        <span class="username">Zaloguj się</span>
-      </div>
+        <div class="profile-image">
+            <img src="images/basic_user.png" alt="Profile Image">
+        </div>
+        <div class="user-info">
+            <span class="username">Zaloguj się</span>
+        </div>
     </div>
-  </header>
+</header>
 
-  <main>
-    <!-- Section for displaying blog posts -->
+<main>
     <section class="blog-posts">
-      <!-- Blog post items go here -->
-    </section>
-  </main>
+  <div class="tile-container" id="tileContainer"></div>
+</section>
 
-  <footer>
-    <div class="footer-content">
-      <span class="author">Marcel Dybek</span>
-      <span class="rights">Wszystkie prawa zastrzeżone</span>
-    </div>
-  </footer>
+</main>
+
+
+<script src="mainSiteFunctionality.js"></script>
 </body>
 </html>

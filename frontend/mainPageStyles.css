@@ -1,7 +1,9 @@
 @font-face {
-    font-family: 'AvenirLTStd-Black';
+    font-family: 'Avenir';
     src: url('fonts/AvenirLTStd-Black.otf') format('otf');
-    /*url('fonts/avenir.woff') format('woff');*/
+    src: url('fonts/AvenirLTStd-Book.otf') format('otf');
+    src: url('fonts/AvenirLTStd-Roman.otf') format('otf');
+
 }
 
 body, html {
@@ -98,52 +100,68 @@ header {
 }
 
 .tile-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+    justify-items: center;
     align-items: center;
-    height: 100vh;
+    height: auto;
     box-sizing: border-box;
-    padding: 20px;
+    padding: 50px;
 }
 
 .tile {
     position: relative;
-    width: calc(50% - 150px);
-    height: 35%;
+    width: 85%;
+    height: 300px;
     background-color: #D7FFF0;
-    margin: 50px;
+    margin: 10px;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.tile-container .tile:not(:last-child) {
-    margin-bottom: -90px;
+.tile:hover {
+    background-color: #ABCCC0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
 }
+
 
 .tile .title {
     position: absolute;
-    left: 30px;
+    top: 2px;
+    left: 20px;
+    font-family: 'AvenirLTStd-Book', sans-serif;
 }
 
 .tile .created-at {
     position: absolute;
-    right: 10px;
+    top: 2px;
+    right: 20px;
     font-size: 15px;
+    font-family: 'AvenirLTStd-Book', sans-serif;
+}
+
+.tile .tags {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    font-size: 14px;
+    font-family: 'AvenirLTStd-Book', sans-serif;
 }
 
 .tile img {
-    width: 70%;
-    height: 70%;
+    width: 73%;
+    height: 73%;
     object-fit: cover;
     display: block;
-    margin: 60px auto 10px;
+    margin: 65px auto 10px;
+    border-radius: 10px;
 }
-
 
 @media screen and (max-width: 768px) {
     .tile {
-        width: calc(100% - 20px);
+        width: calc(100% - 40px);
     }
 }
 

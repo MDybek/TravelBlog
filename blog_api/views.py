@@ -24,6 +24,7 @@ class BlogPostsListView(View):
 
         for post in posts:
             post_data = {
+                'id': post.id,
                 'title': post.title,
                 'created_at': post.created_at,
                 'tags': post.tags,

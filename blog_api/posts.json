@@ -3,8 +3,8 @@
     "model": "blog_api.post",
     "pk": 1,
     "fields": {
-      "title": "Przykładowy tytuł",
-      "tags": "tag1, tag2, tag3",
+      "title": "Zorza polarna",
+      "tags": "zorza, polarna, zima",
       "content": "Przykładowa treść",
       "author": 1,
       "created_at": "2022-01-01T12:00:00Z",
@@ -15,12 +15,48 @@
     "model": "blog_api.post",
     "pk": 2,
     "fields": {
-      "title": "Inny tytuł",
-      "tags": "tag4, tag5",
+      "title": "Wycieczka w gory 2022",
+      "tags": "gory, wycieczka",
       "content": "Inna treść",
       "author": 1,
       "created_at": "2022-01-02T10:30:00Z",
-      "image": "https://www.w3schools.com/w3css/img_lights.jpg"
+      "image": "https://www.w3schools.com/w3css/img_mountains.jpg"
+    }
+  },
+  {
+    "model": "blog_api.post",
+    "pk": 1,
+    "fields": {
+      "title": "Wycieczka turystyczna po gestym lesie",
+      "tags": "las, wycieczka",
+      "content": "Inna treść",
+      "author": 1,
+      "created_at": "2023-01-02T10:30:00Z",
+      "image": "https://www.w3schools.com/w3css/img_forest.jpg"
+    }
+  },
+  {
+    "model": "blog_api.post",
+    "pk": 2,
+    "fields": {
+      "title": "Lot samolotem na Fiji",
+      "tags": "gory, lot",
+      "content": "Inna treść",
+      "author": 1,
+      "created_at": "2022-01-02T10:30:00Z",
+      "image": "https://www.w3schools.com/w3css/img_snowtops.jpg"
+    }
+  },
+  {
+    "model": "blog_api.post",
+    "pk": 1,
+    "fields": {
+      "title": "Odwiedziny samotnych gór w lesie",
+      "tags": "las, skała, gory, wycieczka",
+      "content": "Inna treść",
+      "author": 1,
+      "created_at": "2023-01-02T10:30:00Z",
+      "image": "https://www.w3schools.com/w3css/img_rock.jpg"
     }
   }
 ]

@@ -7,19 +7,20 @@
 </head>
 <body>
 <header>
-    <div class="logo">TravelBlog</div>
+    <a href="/" class="logo">TravelBlog</a>
     <div class="search-bar">
         <label>
             <input type="text" placeholder="Szukaj wśród postów...">
         </label>
         <button type="submit">Szukaj</button>
     </div>
-    <div class="account">
+    <div class="account" id="loginContainer">
         <div class="profile-image">
             <img src="images/basic_user.png" alt="Profile Image">
         </div>
         <div class="user-info">
-            <span class="username">Zaloguj się</span>
+            <span class="username" id="loginLink">Zaloguj się</span>
+            <div id="loginFormContainer"></div>
         </div>
     </div>
 </header>

@@ -25,10 +25,12 @@ header {
     font-family: 'AvenirLTStd-Black', sans-serif;
     font-size: 24px;
     font-weight: bold;
-    margin-left: 15px;
+    color: black;
+    margin-left: 30px;
     height: 100%;
     display: flex;
     align-items: center;
+    text-decoration: none;
 }
 
 .search-bar {
@@ -85,11 +87,10 @@ header {
     object-fit: cover;
 }
 
-
 .user-info {
     display: flex;
     flex-direction: column;
-    margin-right: 20px;
+    margin-right: 30px;
 }
 
 .username {
@@ -97,7 +98,10 @@ header {
     font-family: 'AvenirLTStd-Black', sans-serif;
     font-size: 14px;
     margin: 0;
+    cursor: pointer;
+    text-decoration: none;
 }
+
 
 .tile-container {
     display: grid;
@@ -131,6 +135,8 @@ header {
     position: absolute;
     top: 2px;
     left: 20px;
+    font-weight: bold;
+    font-size: 20px;
     font-family: 'AvenirLTStd-Book', sans-serif;
 }
 
@@ -178,4 +184,37 @@ footer {
 .footer-content {
     display: flex;
     flex-direction: column;
+}
+
+.post-details {
+    padding: 20px;
+    background-color: #f7f7f7;
+}
+
+.post-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.post-author {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.post-tags {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.post-created-at {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: gray;
+}
+
+.post-content {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.5;
 }

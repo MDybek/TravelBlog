@@ -3,10 +3,14 @@ import json
 from django.http import JsonResponse
 from django.views import View
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import CommentSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.core.mail import send_mail
+from rest_framework.permissions import AllowAny
+from rest_framework import serializers
 
 
 from .models import *
@@ -44,7 +48,8 @@ class BlogPostDetailView(View):
                 'tags': post.tags,
                 'content': post.content,
                 'author': post.author.username,
-                'created_at': post.created_at
+                'created_at': post.created_at,
+                'image_url': post.image
             }
             return JsonResponse(post_data)
         except Post.DoesNotExist:
@@ -83,15 +88,15 @@ class SearchView(View):
             results = []
             for post in posts:
                 post_data = {
+                    'id': post.id,
                     'title': post.title,
                     'created_at': post.created_at,
-                    'author': post.author.username,
+                    'tags': post.tags,
                     'image': post.image if post.image else None
-
                 }
                 results.append(post_data)
 
-            return JsonResponse({'results': results})
+            return JsonResponse(results, safe=False)
         else:
             return JsonResponse({'error': 'Query parameter is required'}, status=400)
 
@@ -206,6 +211,7 @@ class CreateBlogPostView(View):
         }
         return JsonResponse(response)
 
+
 class EditBlogPostView(View):
     def post(self, request, pk):
         content_type = request.content_type
@@ -278,6 +284,25 @@ class DeleteBlogPostView(View):
         return JsonResponse({'message': 'Post deleted successfully.'})
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+
+    def get_author(self, comment):
+        return f"{comment.author.first_name} {comment.author.last_name}"
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'content', 'created_at', 'post', 'author']
+
+class DisplayCommentView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, post_id):
+        comments = Comment.objects.filter(post_id=post_id)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+
 class CreateCommentView(View):
     def post(self, request, pk):
         auth_token = request.META.get('HTTP_AUTHORIZATION', '')
@@ -288,13 +313,19 @@ class CreateCommentView(View):
             return JsonResponse({'error': 'Invalid token'}, status=401)
 
         user = token.user
-
         try:
             post = Post.objects.get(pk=pk)
         except Post.DoesNotExist:
             return JsonResponse({'error': 'Post not found'}, status=404)
 
-        content = request.POST.get('content')
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+        content = data.get('content')
+        if not content:
+            return JsonResponse({'error': 'Content field is required'}, status=400)
 
         comment = Comment(post=post, author=user, content=content)
         comment.save()
@@ -381,5 +412,3 @@ class DeleteCommentView(View):
         comment.delete()
 
         return JsonResponse({'message': 'Comment deleted successfully.'})
-
-

@@ -258,6 +258,7 @@ $('.login-form').submit(function (event) {
 
                 $('#login-button').text(response.user).addClass('logged-in');
                 $('#profile-image').addClass('profile-image-logged');
+                $('.login-form').off('submit');
 
                 $('.login-form input[type="text"]').remove();
                 $('.login-form input[type="password"]').remove();
@@ -271,7 +272,16 @@ $('.login-form').submit(function (event) {
                     logout();
                 });
 
+                $('#new-post-button').click(function () {
+                    openNewPostPage();
+                });
+
+                $('#edit-account-button').click(function () {
+                    editAccount();
+                });
+
                 alert('Zalogowano pomyślnie!');
+                $('.login-form').toggleClass('close');
             } else {
                 alert('Błąd logowania. Spróbuj ponownie.');
             }
@@ -303,10 +313,15 @@ $(document).ready(function () {
         $('#logout-button').click(function () {
             logout();
         });
+        $('#new-post-button').click(function () {
+            openNewPostPage();
+        });
+        $('#edit-account-button').click(function () {
+            editAccount();
+        });
     }
 });
 
-// Funkcja wylogowania
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -320,7 +335,7 @@ function logout() {
     $('.login-form').append('<input id="password" type="password" placeholder="Password">');
     $('.login-form').append('<input type="submit" value="SUBMIT">');
 
-    $('.login-form').off('submit'); // Usunięcie wcześniejszego zdarzenia submit
+    $('.login-form').off('submit');
     $('.login-form input[type="submit"]').click(function (event) {
         event.preventDefault();
         login();
@@ -350,7 +365,21 @@ function login() {
                 $('#login-button').text(response.user).addClass('logged-in');
                 $('#profile-image').addClass('profile-image-logged');
 
+                $('.login-form input[type="text"]').remove();
+                $('.login-form input[type="password"]').remove();
+                $('.login-form input[type="submit"]').remove();
+
+                $('.login-form').append('<button id="new-post-button">Napisz post</button>');
+                $('.login-form').append('<button id="edit-account-button">Edytuj dane konta</button>');
+                $('.login-form').append('<button id="logout-button">Wyloguj się</button>');
+
+                $('#logout-button').click(function () {
+                    logout();
+                });
+
                 alert('Zalogowano pomyślnie!');
+                $('.login-form').toggleClass('close');
+
             } else {
                 alert('Błąd logowania. Spróbuj ponownie.');
             }
@@ -362,7 +391,60 @@ function login() {
 
     $('#username').val('');
     $('#password').val('');
-
-    $('.login-form').removeClass('open');
 }
 
+function openNewPostPage() {
+    // Wyczyszczenie zawartości strony poza headerem
+    $('body > :not(header)').remove();
+
+    // Dodanie pól do tworzenia nowego posta
+    $('body').append('<div class="new-post-page"></div>');
+    $('.new-post-page').append('<input id="post-title" type="text" placeholder="Tytuł">');
+    $('.new-post-page').append('<textarea id="post-content" placeholder="Treść"></textarea>');
+    $('.new-post-page').append('<button id="post-submit">Opublikuj</button>');
+
+    // Dodanie obsługi zdarzenia kliknięcia na przycisk "Opublikuj"
+    $('#post-submit').click(function () {
+        createNewPost();
+    });
+}
+
+function createNewPost() {
+    var title = $('#post-title').val();
+    var content = $('#post-content').val();
+
+    // Wykonanie odpowiednich operacji, np. wysłanie żądania do serwera
+
+    // Po zakończeniu tworzenia posta:
+    // Przeładowanie strony lub wykonanie innych odpowiednich operacji
+
+    alert('Post został opublikowany!');
+}
+
+function editAccount() {
+    // Wyczyść stronę poza headerem
+    $('body > :not(header)').remove();
+
+    // Dodaj pola do edycji danych konta
+    $('body').append('<div class="edit-account-page"></div>');
+    $('.edit-account-page').append('<input id="edit-username" type="text" placeholder="Nowa nazwa użytkownika">');
+    $('.edit-account-page').append('<input id="edit-password" type="password" placeholder="Nowe hasło">');
+    $('.edit-account-page').append('<button id="edit-submit">Zapisz zmiany</button>');
+
+    // Dodaj obsługę zdarzenia kliknięcia na przycisk "Zapisz zmiany"
+    $('#edit-submit').click(function () {
+        saveAccountChanges();
+    });
+}
+
+function saveAccountChanges() {
+    var newUsername = $('#edit-username').val();
+    var newPassword = $('#edit-password').val();
+
+    // Wykonaj odpowiednie operacje, np. wysyłkę żądania do serwera
+
+    // Po zakończeniu zapisywania zmian:
+    // Przeładuj stronę lub wykonaj inne odpowiednie operacje
+
+    alert('Zmiany zostały zapisane!');
+}

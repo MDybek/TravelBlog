@@ -154,7 +154,8 @@ class UserLoginView(View):
             token, created = Token.objects.get_or_create(user=user)
             response = {
                 'message': 'Login successful.',
-                'token': token.key
+                'token': token.key,
+                'user': user.first_name + " " + user.last_name
             }
             return JsonResponse(response)
         else:

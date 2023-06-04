@@ -23,6 +23,7 @@ searchInput.addEventListener('keydown', function (event) {
     }
 });
 
+
 function handleSearch() {
     const searchQuery = searchInput.value;
 
@@ -229,3 +230,139 @@ function createPostTile(post) {
 
     return tile;
 }
+
+$('#login-button').click(function () {
+    $('.login-form').toggleClass('open');
+});
+
+$('.login-form').submit(function (event) {
+    event.preventDefault();
+
+    var username = $('#username').val();
+    var password = $('#password').val();
+
+    var data = {
+        username: username,
+        password: password
+    };
+
+    $.ajax({
+        url: '/blog/login',
+        type: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function (response) {
+            if (response.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('user', response.user);
+
+                $('#login-button').text(response.user).addClass('logged-in');
+                $('#profile-image').addClass('profile-image-logged');
+
+                $('.login-form input[type="text"]').remove();
+                $('.login-form input[type="password"]').remove();
+                $('.login-form input[type="submit"]').remove();
+
+                $('.login-form').append('<button id="new-post-button">Napisz post</button>');
+                $('.login-form').append('<button id="edit-account-button">Edytuj dane konta</button>');
+                $('.login-form').append('<button id="logout-button">Wyloguj się</button>');
+
+                $('#logout-button').click(function () {
+                    logout();
+                });
+
+                alert('Zalogowano pomyślnie!');
+            } else {
+                alert('Błąd logowania. Spróbuj ponownie.');
+            }
+        },
+        error: function (xhr, status, error) {
+            alert('Błąd logowania. Spróbuj ponownie.');
+        }
+    });
+
+    $('#username').val('');
+    $('#password').val('');
+
+    $('.login-form').removeClass('open');
+});
+
+$(document).ready(function () {
+    var user = localStorage.getItem('user');
+    if (user) {
+        $('#login-button').text(user).addClass('logged-in');
+        $('#profile-image').addClass('profile-image-logged');
+        $('.login-form input[type="text"]').remove();
+        $('.login-form input[type="password"]').remove();
+        $('.login-form input[type="submit"]').remove();
+
+        $('.login-form').append('<button id="new-post-button">Napisz post</button>');
+        $('.login-form').append('<button id="edit-account-button">Edytuj dane konta</button>');
+        $('.login-form').append('<button id="logout-button">Wyloguj się</button>');
+
+        $('#logout-button').click(function () {
+            logout();
+        });
+    }
+});
+
+// Funkcja wylogowania
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    $('#login-button').text('LOG IN').removeClass('logged-in');
+    $('#profile-image').removeClass('profile-image-logged');
+
+    $('#new-post-button').remove();
+    $('#edit-account-button').remove();
+    $('#logout-button').remove();
+    $('.login-form').append('<input id="username" type="text" placeholder="Username">');
+    $('.login-form').append('<input id="password" type="password" placeholder="Password">');
+    $('.login-form').append('<input type="submit" value="SUBMIT">');
+
+    $('.login-form').off('submit'); // Usunięcie wcześniejszego zdarzenia submit
+    $('.login-form input[type="submit"]').click(function (event) {
+        event.preventDefault();
+        login();
+    });
+}
+
+// Funkcja logowania
+function login() {
+    var username = $('#username').val();
+    var password = $('#password').val();
+
+    var data = {
+        username: username,
+        password: password
+    };
+
+    $.ajax({
+        url: '/blog/login',
+        type: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function (response) {
+            if (response.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('user', response.user);
+
+                $('#login-button').text(response.user).addClass('logged-in');
+                $('#profile-image').addClass('profile-image-logged');
+
+                alert('Zalogowano pomyślnie!');
+            } else {
+                alert('Błąd logowania. Spróbuj ponownie.');
+            }
+        },
+        error: function (xhr, status, error) {
+            alert('Błąd logowania. Spróbuj ponownie.');
+        }
+    });
+
+    $('#username').val('');
+    $('#password').val('');
+
+    $('.login-form').removeClass('open');
+}
+

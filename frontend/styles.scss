@@ -1,0 +1,80 @@
+@import '../node_modules/bourbon/core/_bourbon.scss';
+
+@font-face {
+  font-family: 'Avenir';
+  src: url('fonts/AvenirLTStd-Black.otf') format('otf');
+  src: url('fonts/AvenirLTStd-Book.otf') format('otf');
+  src: url('fonts/AvenirLTStd-Roman.otf') format('otf');
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.login-wrapper {
+  width: 90px;
+  margin: 0 auto 0;
+}
+
+button {
+  padding: 8px 15px;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: #475E5E;
+  font-size: 14px;
+  font-family: 'AvenirLTStd-Book', sans-serif;
+  text-transform: uppercase;
+  border-radius: 4px;
+  box-shadow: 0 4px 0 darken(#475E5E, 5%);
+
+  &:active {
+    margin-top: 2px;
+    box-shadow: 0 2px 0 darken(#1BBC9B, 5%);
+  }
+}
+
+.login-container {
+  position: relative;
+}
+
+.login-form {
+  display: none;
+  position: absolute;
+  padding: 20px;
+  margin-top: 10px;
+  background: #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 0 darken(#ddd, 5%);
+  right: 10px;
+  top: 5px;
+
+  input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 0;
+    outline: 0;
+    background: #f1f1f1;
+    font-weight: 300;
+    font-family: 'AvenirLTStd-Book', sans-serif;
+    border-radius: 2px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  input[type="submit"] {
+    color: #ffF;
+    background: #475E5E;
+    font-style: normal;
+    font-family: 'AvenirLTStd-Book', sans-serif;
+    box-shadow: 0 4px 0 darken(#475E5F, 5%);
+  }
+}
+
+.open {
+  display: block;
+  width: 300px;
+}

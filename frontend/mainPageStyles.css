@@ -3,7 +3,6 @@
     src: url('fonts/AvenirLTStd-Black.otf') format('otf');
     src: url('fonts/AvenirLTStd-Book.otf') format('otf');
     src: url('fonts/AvenirLTStd-Roman.otf') format('otf');
-
 }
 
 body, html {
@@ -67,18 +66,6 @@ header {
     align-items: center;
     margin: 0;
     height: 100%;
-}
-
-.profile-image {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-right: 10px;
-    align-items: center;
-    border: 2px solid black;
-    display: flex;
-    justify-content: center;
 }
 
 .profile-image img {
@@ -237,7 +224,7 @@ footer {
 }
 
 .post-image {
-    width: 70%;
+    width: 68%;
     margin-bottom: 20px;
     margin-left: auto;
     margin-right: auto;
@@ -289,4 +276,142 @@ footer {
 .comments-section {
     background-color: #f7f7f7;
     padding: 20px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.login-wrapper {
+    width: 90px;
+    margin: 0 auto 0;
+}
+
+button {
+    padding: 8px 15px;
+    border: 0;
+    outline: 0;
+    color: #fff;
+    background: #475E5E;
+    font-size: 14px;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    text-transform: uppercase;
+    border-radius: 4px;
+    box-shadow: 0 4px 0 #3c4f4f;
+}
+
+button:active {
+    margin-top: 2px;
+    box-shadow: 0 2px 0 #18a689;
+}
+
+.login-container {
+    position: relative;
+}
+
+.login-form {
+    display: none;
+    position: absolute;
+    padding: 20px;
+    margin-top: 10px;
+    background: #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 0 #d0d0d0;
+    right: 10px;
+    top: 5px;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 0;
+    outline: 0;
+    background: #f1f1f1;
+    font-weight: 300;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    border-radius: 2px;
+}
+
+.login-form input:last-child {
+    margin-bottom: 0;
+}
+
+.login-form input[type=submit] {
+    color: #ffF;
+    background: #475E5E;
+    font-style: normal;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    box-shadow: 0 4px 0 #3c5050;
+}
+
+.open {
+    display: block;
+    width: 300px;
+    z-index: 1;
+}
+
+.login-wrapper {
+    width: 120px; /
+    margin: 0 auto;
+    position: relative;
+}
+
+button.logged-in {
+    width: 200px;
+   text-align: center;
+}
+
+.logged-in .profile-image {
+    margin-right: 10px;
+}
+
+.logged-in {
+    transform: translateX(-50%);
+    left: 50%;
+}
+
+.profile-image {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 10px;
+    align-items: center;
+    border: 2px solid black;
+    display: flex;
+    justify-content: center;
+}
+
+.profile-image-logged {
+    transform: translateX(-400%); /* Poprawiamy przesunięcie */
+    left: 50%;
+}
+
+.login-form button {
+  display: block;
+  width: 250px;
+  margin: 10px auto;
+  padding: 8px;
+  color: #fff;
+  background: #475E5E;
+  font-family: "AvenirLTStd-Book", sans-serif;
+  font-size: 12px;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  box-shadow: 0 4px 0 #3c5050;
+}
+
+.login-form button:first-child {
+  margin-top: 0; /* usuwa margines od góry dla pierwszego przycisku */
+}
+
+.login-form button:last-child {
+  margin-bottom: 0; /* usuwa margines na dole dla ostatniego przycisku */
+}
+
+.login-form button:hover {
+  background: #3c5050;
+  cursor: pointer;
 }

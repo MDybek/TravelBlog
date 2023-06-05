@@ -147,6 +147,34 @@ function displayPostDetails(postId) {
             postDetailsContainer.appendChild(postMainSection);
             mainContent.appendChild(postDetailsContainer);
 
+            const commentForm = document.createElement("form");
+            commentForm.className = "comment-form";
+
+            const commentTextarea = document.createElement("textarea");
+            commentTextarea.className = "comment-textarea";
+            commentTextarea.placeholder = "Dodaj komentarz";
+
+            const commentButton = document.createElement("button");
+            commentButton.className = "comment-button";
+            commentButton.textContent = "Dodaj komentarz";
+
+            commentForm.appendChild(commentTextarea);
+            commentForm.appendChild(commentButton);
+            postDetailsContainer.appendChild(commentForm);
+
+            commentForm.addEventListener("submit", event => {
+                event.preventDefault();
+                const commentContent = commentTextarea.value;
+                const emptyCheck = commentContent.trim();
+                if (emptyCheck) {
+                    addComment(postId, commentContent);
+                    commentTextarea.value = "";
+                } else {
+                    alert('Komentarz nie może być pusty.');
+                }
+
+            });
+
             fetch(`/blog/posts/${postId}/comments`)
                 .then(response => response.json())
                 .then(comments => {
@@ -157,8 +185,10 @@ function displayPostDetails(postId) {
                     commentsContainer.className = "comments-container";
 
                     comments.forEach(comment => {
+
                         const commentElement = document.createElement("div");
                         commentElement.className = "comment";
+                        commentElement.setAttribute("data-comment-id", comment.id);
 
                         const commentAuthor = document.createElement("p");
                         commentAuthor.className = "comment-author";
@@ -178,13 +208,238 @@ function displayPostDetails(postId) {
                         commentElement.appendChild(commentContent);
                         commentElement.appendChild(commentDate);
 
+                        const currentUserId = localStorage.getItem('user_id');
+                        if (currentUserId && parseInt(comment.user_id) === parseInt(currentUserId)) {
+                            const editButton = document.createElement("button");
+                            editButton.className = "edit-comment-button";
+                            editButton.textContent = "Edytuj";
+                            editButton.addEventListener("click", () => {
+                                editComment(comment.id, postId);
+                            });
+
+                            const deleteButton = document.createElement("button");
+                            deleteButton.className = "delete-comment-button";
+                            deleteButton.textContent = "Usuń";
+                            deleteButton.addEventListener("click", () => {
+                                deleteComment(comment.id, postId);
+                            });
+
+                            const buttonContainer = document.createElement("div");
+                            buttonContainer.className = "comment-buttons-container";
+                            buttonContainer.appendChild(editButton);
+                            buttonContainer.appendChild(deleteButton);
+
+                            commentElement.appendChild(buttonContainer);
+                        }
+
                         commentsSection.appendChild(commentElement);
                     });
+
                     postDetailsContainer.appendChild(commentsSection);
                 })
                 .catch(error => {
                     console.error("Error while loading comments:", error);
                 });
+        });
+}
+
+function addComment(postId, commentContent) {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('Brak autoryzacji. Zaloguj się, aby skomentować post.');
+        return;
+    }
+
+    const url = `/blog/posts/${postId}/addcomment`;
+    const requestBody = {
+        content: commentContent
+    };
+
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify(requestBody)
+    };
+
+    fetch(url, requestOptions)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Komentarz został dodany.');
+                window.location.reload();
+            } else {
+                alert('Wystąpił błąd podczas dodawania komentarza.');
+            }
+        })
+        .catch(error => {
+            console.error('Wystąpił błąd podczas wysyłania żądania:', error);
+        });
+}
+
+function editComment(commentId, postId) {
+    const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+
+    if (!commentElement) {
+        return;
+    }
+
+    const commentContent = commentElement.querySelector(".comment-content");
+    const commentText = commentContent.textContent;
+
+    const commentTextarea = document.createElement("textarea");
+    commentTextarea.className = "comment-textarea-editor";
+    commentTextarea.value = commentText;
+
+    const submitButton = document.createElement("button");
+    submitButton.className = "comment-submit-button";
+    submitButton.textContent = "Zatwierdź";
+
+    const cancelButton = document.createElement("button");
+    cancelButton.className = "comment-cancel-button";
+    cancelButton.textContent = "Anuluj";
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "comment-buttons-container";
+    buttonContainer.appendChild(submitButton);
+    buttonContainer.appendChild(cancelButton);
+
+    const editButton = commentElement.querySelector(".edit-comment-button");
+    const deleteButton = commentElement.querySelector(".delete-comment-button");
+
+    if (editButton) {
+        editButton.parentNode.removeChild(editButton);
+    }
+
+    if (deleteButton) {
+        deleteButton.parentNode.removeChild(deleteButton);
+    }
+
+    commentElement.removeChild(commentContent);
+    commentElement.appendChild(commentTextarea);
+    commentElement.appendChild(buttonContainer);
+
+    submitButton.addEventListener("click", () => {
+        const editedContent = commentTextarea.value;
+        if (editedContent.trim()) {
+            updateComment(commentId, editedContent, postId);
+            const currentUserId = localStorage.getItem('user_id');
+            if (currentUserId && parseInt(comment.user_id) === parseInt(currentUserId)) {
+                const newEditButton = document.createElement("button");
+                newEditButton.className = "edit-comment-button";
+                newEditButton.textContent = "Edytuj";
+                newEditButton.addEventListener("click", () => {
+                    editComment(commentId);
+                });
+
+                const newDeleteButton = document.createElement("button");
+                newDeleteButton.className = "delete-comment-button";
+                newDeleteButton.textContent = "Usuń";
+                newDeleteButton.addEventListener("click", () => {
+                    deleteComment(commentId, postId);
+                });
+
+                buttonContainer.appendChild(newEditButton);
+                buttonContainer.appendChild(newDeleteButton);
+            }
+        } else {
+            alert('Komentarz nie może być pusty.');
+        }
+    });
+
+    cancelButton.addEventListener("click", () => {
+        commentElement.removeChild(commentTextarea);
+        commentElement.removeChild(buttonContainer);
+        const restoredCommentContent = document.createElement("p");
+        restoredCommentContent.className = "comment-content";
+        restoredCommentContent.textContent = commentText;
+        commentElement.appendChild(restoredCommentContent);
+
+        const newEditButton = document.createElement("button");
+        newEditButton.className = "edit-comment-button";
+        newEditButton.textContent = "Edytuj";
+        newEditButton.addEventListener("click", () => {
+            editComment(commentId);
+        });
+
+        commentElement.appendChild(newEditButton);
+
+
+        const newDeleteButton = document.createElement("button");
+        newDeleteButton.className = "delete-comment-button";
+        newDeleteButton.textContent = "Usuń";
+        newDeleteButton.addEventListener("click", () => {
+            deleteComment(commentId, postId);
+        });
+
+        commentElement.appendChild(newDeleteButton);
+
+    });
+}
+
+function updateComment(commentId, editedContent, postId) {
+    const url = `/blog/posts/${postId}/comments/${commentId}/edit`;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({content: editedContent})
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Komentarz został zaktualizowany.');
+                // Odśwież szczegóły postu
+                displayPostDetails(postId);
+
+                // Wywołanie funkcji editComment po zakończeniu aktualizacji
+                const currentUserId = localStorage.getItem('user_id');
+                if (currentUserId && parseInt(comment.user_id) === parseInt(currentUserId)) {
+                    editComment(commentId);
+                }
+            } else {
+                alert('Wystąpił błąd podczas aktualizacji komentarza.');
+            }
+        })
+        .catch(error => {
+            console.error('Wystąpił błąd podczas wysyłania żądania:', error);
+        });
+}
+
+
+function deleteComment(commentId, postId) {
+    const confirmDelete = confirm('Czy na pewno chcesz usunąć ten komentarz?');
+    if (!confirmDelete) {
+        return;
+    }
+
+    const url = `/blog/posts/${postId}/comments/${commentId}/delete`;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${localStorage.getItem('token')}` // Dodaj token autentykacji
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Komentarz został usunięty.');
+                // Odśwież szczegóły postu
+                displayPostDetails(postId);
+            } else {
+                alert('Wystąpił błąd podczas usuwania komentarza.');
+            }
+        })
+        .catch(error => {
+            console.error('Wystąpił błąd podczas wysyłania żądania:', error);
         });
 }
 
@@ -253,6 +508,12 @@ function editPost(postId) {
             tagsInput.type = 'text';
             tagsInput.value = post.tags;
 
+            const imageLabel = document.createElement('label');
+            imageLabel.textContent = 'Zdjęcie:';
+            const imageInput = document.createElement('input');
+            imageInput.type = 'text';
+            imageInput.value = post.image_url;
+
             const submitButton = document.createElement('button');
             submitButton.textContent = 'Zatwierdź zmiany';
 
@@ -262,17 +523,20 @@ function editPost(postId) {
                 const updatedPost = {
                     title: titleInput.value,
                     content: contentTextarea.value,
-                    tags: tagsInput.value
+                    tags: tagsInput.value,
+                    image: imageInput.value
                 };
                 saveEditedPost(postId, updatedPost);
             });
 
             editPostForm.appendChild(titleLabel);
             editPostForm.appendChild(titleInput);
-            editPostForm.appendChild(contentLabel);
-            editPostForm.appendChild(contentTextarea);
             editPostForm.appendChild(tagsLabel);
             editPostForm.appendChild(tagsInput);
+            editPostForm.appendChild(contentLabel);
+            editPostForm.appendChild(contentTextarea);
+            editPostForm.appendChild(imageLabel);
+            editPostForm.appendChild(imageInput);
             editPostForm.appendChild(submitButton);
 
             // Wyczyść główny kontener i dodaj formularz edycji postu
@@ -285,6 +549,30 @@ function editPost(postId) {
         });
 }
 
+function saveEditedPost(postId, updatedPost) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Token ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify(updatedPost)
+    };
+
+    fetch(`/blog/posts/${postId}/edit`, requestOptions)
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Post updated successfully.') {
+                alert('Post został pomyślnie zaktualizowany.');
+                window.location.reload();
+            } else {
+                alert('Wystąpił błąd podczas aktualizacji postu.');
+            }
+        })
+        .catch(error => {
+            console.error('Wystąpił błąd podczas wysyłania żądania:', error);
+        });
+}
 
 const logoElement = document.querySelector(".logo");
 logoElement.addEventListener("click", handleLogoClick);
@@ -369,6 +657,7 @@ $(document).ready(function () {
         $('.login-form input[type="text"]').remove();
         $('.login-form input[type="password"]').remove();
         $('.login-form input[type="submit"]').remove();
+        $('.register-new-user-button').remove();
 
         $('.login-form').append('<button id="new-post-button">Napisz post</button>');
         $('.login-form').append('<button id="edit-account-button">Edytuj dane konta</button>');
@@ -399,6 +688,7 @@ function logout() {
     $('.login-form').append('<input id="username" type="text" placeholder="Username">');
     $('.login-form').append('<input id="password" type="password" placeholder="Password">');
     $('.login-form').append('<input type="submit" value="SUBMIT">');
+    $('.login-form').append('<button id="register-button" class="register-new-user-button">REGISTER</button>');
 
     $('.login-form').off('submit');
     $('.login-form input[type="submit"]').click(function (event) {
@@ -469,6 +759,99 @@ function login() {
     $('#password').val('');
 }
 
+const registerButton = document.getElementById('register-button');
+
+registerButton.addEventListener('click', () => {
+    $('.login-form').removeClass('open');
+    $('body > :not(header)').remove();
+
+    const formContainer = document.createElement('div');
+    formContainer.className = 'register-form-container';
+
+    const usernameInput = document.createElement('input');
+    usernameInput.setAttribute('type', 'text');
+    usernameInput.setAttribute('placeholder', 'Username');
+    formContainer.appendChild(usernameInput);
+
+    const firstNameInput = document.createElement('input');
+    firstNameInput.setAttribute('type', 'text');
+    firstNameInput.setAttribute('placeholder', 'First Name');
+    formContainer.appendChild(firstNameInput);
+
+    const lastNameInput = document.createElement('input');
+    lastNameInput.setAttribute('type', 'text');
+    lastNameInput.setAttribute('placeholder', 'Last Name');
+    formContainer.appendChild(lastNameInput);
+
+    const emailInput = document.createElement('input');
+    emailInput.setAttribute('type', 'email');
+    emailInput.setAttribute('placeholder', 'Email');
+    formContainer.appendChild(emailInput);
+
+    const passwordInput = document.createElement('input');
+    passwordInput.setAttribute('type', 'password');
+    passwordInput.setAttribute('placeholder', 'Password');
+    formContainer.appendChild(passwordInput);
+
+    const confirmPasswordInput = document.createElement('input');
+    confirmPasswordInput.setAttribute('type', 'password');
+    confirmPasswordInput.setAttribute('placeholder', 'Confirm Password');
+    formContainer.appendChild(confirmPasswordInput);
+
+    const createAccountButton = document.createElement('button');
+    createAccountButton.textContent = 'Utwórz konto';
+    formContainer.appendChild(createAccountButton);
+
+    document.body.appendChild(formContainer);
+
+    createAccountButton.addEventListener('click', () => {
+        const username = usernameInput.value;
+        const firstName = firstNameInput.value;
+        const lastName = lastNameInput.value;
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (username.trim() === '' || firstName.trim() === '' || lastName.trim() === '' || email.trim() === '' || password.trim() === '' || confirmPassword.trim() === '') {
+            alert('Wszystkie pola są wymagane');
+        } else if (password !== confirmPassword) {
+            alert('Hasła się nie zgadzają');
+        } else {
+            const userData = {
+                username: username,
+                first_name: firstName,
+                last_name: lastName,
+                email: email,
+                password: password,
+            };
+
+            registerUser(userData);
+            alert('Konto zostało utworzone');
+        }
+    });
+});
+
+function registerUser(userData) {
+    const url = '/blog/register';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Konto zostało utworzone.');
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Wystąpił błąd podczas wysyłania żądania:', error);
+        });
+}
 
 function openNewPostPage() {
     var user = localStorage.getItem('user');
@@ -548,7 +931,6 @@ function editAccount() {
         $('.login-form').removeClass('open');
         $('body > :not(header)').remove();
 
-        // Pobierz aktualne dane użytkownika
         $.ajax({
             url: '/blog/user/profile',
             type: 'GET',
@@ -629,10 +1011,10 @@ function saveAccountChanges() {
     }
 
     var data = {
-        username: newUsername,
-        first_name: newFirstName,
-        last_name: newLastName,
-        email: newEmail
+        'username': newUsername,
+        'first_name': newFirstName,
+        'last_name': newLastName,
+        'email': newEmail
     };
 
     $.ajax({
@@ -647,15 +1029,13 @@ function saveAccountChanges() {
             if (response.message === "User profile updated successfully") {
                 localStorage.setItem('user', data.first_name + " " + data.last_name);
                 alert('Zmiany zostały zapisane!');
-                // location.reload();
+                location.reload();
             } else {
-                // alert('Nieznany komunikat odpowiedzi. Spróbuj ponownie.');
+                alert('Nieznany komunikat odpowiedzi. Spróbuj ponownie.');
             }
         },
         error: function (xhr, status, error) {
-            // alert('Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie.');
+            alert('Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie.');
         }
     });
 }
-
-

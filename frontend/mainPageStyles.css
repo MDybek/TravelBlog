@@ -54,6 +54,7 @@ header {
     color: #fff;
     border: none;
     border-radius: 8px;
+    width: 80px;
 }
 
 .search-bar input[type="text"],
@@ -242,7 +243,7 @@ footer {
     width: 65%;
     background-color: #D6F0E6;
     padding: 10px;
-    margin: 0 auto 10px;
+    margin: 0 auto 14px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -287,9 +288,45 @@ footer {
 .login-wrapper {
     width: 90px;
     margin: 0 auto 0;
+    font-family: "AvenirLTStd-Book", sans-serif;
 }
 
 button {
+    padding: 8px 15px;
+    border: 0;
+    outline: 0;
+    color: #fff;
+    background: #475E5E;
+    font-size: 14px;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    text-transform: uppercase;
+    border-radius: 4px;
+    box-shadow: 0 4px 0 #3c4f4f;
+    width: 100%;
+}
+
+.edit-comment-button,
+.delete-comment-button,
+.comment-submit-button,
+.comment-cancel-button {
+  padding: initial;
+  border: initial;
+  outline: initial;
+  color: initial;
+  background: initial;
+  font-size: initial;
+  font-family: initial;
+  text-transform: initial;
+  border-radius: initial;
+  box-shadow: initial;
+  width: initial;
+}
+
+
+.edit-comment-button,
+.delete-comment-button,
+.comment-submit-button,
+.comment-cancel-button {
     padding: 8px 15px;
     border: 0;
     outline: 0;
@@ -321,6 +358,7 @@ button:active {
     box-shadow: 0 4px 0 #d0d0d0;
     right: 10px;
     top: 5px;
+    font-family: "AvenirLTStd-Book", sans-serif;
 }
 
 .login-form input {
@@ -354,23 +392,15 @@ button:active {
 }
 
 .login-wrapper {
-    width: 120px;
-/ margin: 0 auto;
+    width: 200px;
+    margin: 0 auto;
     position: relative;
 }
 
 button.logged-in {
-    /*width: 200px;*/
+    width: 200px;
     text-align: center;
-}
-
-.logged-in .profile-image {
-    margin-right: 10px;
-}
-
-.logged-in {
-    /*transform: translateX(-50%);*/
-    left: 50%;
+    font-family: "AvenirLTStd-Book", sans-serif;
 }
 
 .profile-image {
@@ -392,17 +422,16 @@ button.logged-in {
 
 .login-form button {
     display: block;
-    width: 250px;
-    margin: 10px auto;
-    padding: 8px;
+    width: 100%;
     color: #fff;
     background: #475E5E;
     font-family: "AvenirLTStd-Book", sans-serif;
-    font-size: 12px;
+    font-size: 10px;
     text-align: center;
     text-decoration: none;
     border: none;
     box-shadow: 0 4px 0 #3c5050;
+    margin-bottom: 10px;
 }
 
 .login-form button:first-child {
@@ -459,6 +488,7 @@ button.logged-in {
     border-radius: 4px;
     resize: none;
     font-family: "AvenirLTStd-Book", sans-serif;
+    font-size: 14px;
 }
 
 .edit-account-page {
@@ -551,6 +581,8 @@ button.logged-in {
     border-radius: 4px;
     resize: none;
     font-family: "AvenirLTStd-Book", sans-serif;
+    font-size: 14px;
+
 }
 
 .edit-post-form label {
@@ -559,4 +591,98 @@ button.logged-in {
     text-align: left;
     width: 48vw;
     font-size: 13px;
+}
+
+.comment-textarea {
+    width: 60%;
+    height: 90px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    font-size: 14px;
+}
+
+.comment-button {
+    width: 60%;
+    padding: 10px;
+    background: #475E5E;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #3c5050;
+}
+
+.comment-button:hover {
+    background-color: #324545;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.edit-comment-button {
+    margin-right: 15px;
+}
+
+.delete-comment-button {
+    margin-left: 15px;
+}
+
+.comment-submit-button {
+    margin-right: 15px;
+}
+
+.comment-cancel-button {
+    margin-left: 15px;
+}
+
+.comment-textarea-editor {
+    height: 15vh;
+    width: 55vw;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    font-size: 14px;
+}
+
+.register-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+}
+
+.register-form-container input {
+    width: 40vw;
+    margin-bottom: 10px;
+    padding: 8px;
+    border: none;
+    outline: none;
+    background: #f1f1f1;
+    font-weight: 300;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.register-form-container button {
+    width: 40vw;
+    padding: 8px;
+    color: #fff;
+    background: #475E5E;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    box-shadow: 0 4px 0 #3c5050;
 }

@@ -258,17 +258,7 @@ class EditBlogPostView(View):
         post.image = image
         post.save()
 
-        response = {
-            'message': 'Post updated successfully.',
-            'post_id': post.id,
-            'title': post.title,
-            'tags': post.tags,
-            'content': post.content,
-            'author': post.author.username,
-            'created_at': post.created_at,
-            'image': post.image
-        }
-        return JsonResponse(response)
+        return JsonResponse({'message': 'Post updated successfully.'})
 
 
 class DeleteBlogPostView(View):
@@ -289,7 +279,7 @@ class DeleteBlogPostView(View):
 
         post.delete()
 
-        return JsonResponse({'message': 'Post deleted successfully.'})
+        return JsonResponse({'success': True, 'message': 'Post deleted successfully.'})
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -307,9 +297,15 @@ class DisplayCommentView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, post_id):
-        comments = Comment.objects.filter(post_id=post_id)
+        comments = Comment.objects.filter(post_id=post_id).order_by('-created_at')
         serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
+
+        serialized_data = serializer.data
+        for comment_data in serialized_data:
+            comment = Comment.objects.get(id=comment_data['id'])
+            comment_data['user_id'] = comment.author_id
+
+        return Response(serialized_data)
 
 
 class CreateCommentView(View):
@@ -339,7 +335,7 @@ class CreateCommentView(View):
         comment = Comment(post=post, author=user, content=content)
         comment.save()
 
-        return JsonResponse({'message': 'Comment created successfully.'})
+        return JsonResponse({'success': True, 'message': 'Comment created successfully.'})
 
 
 class UserProfileView(View):
@@ -362,6 +358,15 @@ class UserProfileView(View):
         return JsonResponse(profile_data)
 
     def post(self, request):
+        auth_token = request.META.get('HTTP_AUTHORIZATION', '')
+        token_key = auth_token.split('Token ')[1] if auth_token.startswith('Token ') else ''
+        try:
+            token = Token.objects.get(key=token_key)
+        except Token.DoesNotExist:
+            return JsonResponse({'error': 'Invalid token'}, status=401)
+
+        user = token.user
+
         content_type = request.content_type
         if content_type == 'application/json':
             data = json.loads(request.body)
@@ -377,15 +382,6 @@ class UserProfileView(View):
         else:
             return JsonResponse({'error': 'Unsupported content type'}, status=400)
 
-        auth_token = request.META.get('HTTP_AUTHORIZATION', '')
-        token_key = auth_token.split('Token ')[1] if auth_token.startswith('Token ') else ''
-        try:
-            token = Token.objects.get(key=token_key)
-        except Token.DoesNotExist:
-            return JsonResponse({'error': 'Invalid token'}, status=401)
-
-        user = token.user
-
         if newUsername != user.username and newUsername:
             if User.objects.filter(username=newUsername).exclude(id=user.id).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=400)
@@ -398,7 +394,7 @@ class UserProfileView(View):
 
         user.save()
 
-        return JsonResponse({'message': 'User profile updated successfully.'})
+        return JsonResponse({'success': True, 'message': 'User profile updated successfully.'})
 
 
 class LikePostView(View):
@@ -432,7 +428,7 @@ class DeleteCommentView(View):
         user = token.user
 
         try:
-            comment = Comment.objects.get(pk=comment_id)
+            comment = Comment.objects.get(pk=comment_id, post=pk)
         except Comment.DoesNotExist:
             return JsonResponse({'error': 'Comment not found'}, status=404)
 
@@ -441,4 +437,39 @@ class DeleteCommentView(View):
 
         comment.delete()
 
-        return JsonResponse({'message': 'Comment deleted successfully.'})
+        return JsonResponse({'success': True, 'message': 'Comment deleted successfully.'})
+
+
+class EditCommentView(View):
+    def post(self, request, pk, comment_id):
+        auth_token = request.META.get('HTTP_AUTHORIZATION', '')
+        token_key = auth_token.split('Token ')[1] if auth_token.startswith('Token ') else ''
+        try:
+            token = Token.objects.get(key=token_key)
+        except Token.DoesNotExist:
+            return JsonResponse({'error': 'Invalid token'}, status=401)
+
+        user = token.user
+
+        try:
+            comment = Comment.objects.get(pk=comment_id, post=pk)
+        except Comment.DoesNotExist:
+            return JsonResponse({'error': 'Comment not found'}, status=404)
+
+        if comment.author != user:
+            return JsonResponse({'error': 'You do not have permission to edit this comment'}, status=403)
+
+        content_type = request.content_type
+        if content_type == 'application/json':
+            data = json.loads(request.body)
+            content = data.get('content')
+        else:
+            return JsonResponse({'error': 'Unsupported content type'}, status=400)
+
+        if not content:
+            return JsonResponse({'error': 'Comment content is required'}, status=400)
+
+        comment.content = content
+        comment.save()
+
+        return JsonResponse({'success': True, 'message': 'Comment edited successfully.'})

@@ -385,6 +385,7 @@ class UserProfileView(View):
         if newUsername != user.username and newUsername:
             if User.objects.filter(username=newUsername).exclude(id=user.id).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=400)
+
         if newFirstName != user.first_name:
             user.first_name = newFirstName
         if newLastName != user.last_name:

@@ -956,7 +956,6 @@ function editAccount() {
 
                 $('#edit-submit').click(function () {
                     saveAccountChanges();
-                    location.reload();
                 });
             },
             error: function (xhr, status, error) {
@@ -1010,12 +1009,12 @@ function saveAccountChanges() {
         return;
     }
 
-    var data = {
+    var data = JSON.stringify({
         'username': newUsername,
         'first_name': newFirstName,
         'last_name': newLastName,
         'email': newEmail
-    };
+    });
 
     $.ajax({
         url: '/blog/user/profile',
@@ -1026,8 +1025,8 @@ function saveAccountChanges() {
             'Content-Type': 'application/json'
         },
         success: function (response) {
-            if (response.message === "User profile updated successfully") {
-                localStorage.setItem('user', data.first_name + " " + data.last_name);
+            if (response.success) {
+                localStorage.setItem('user', newFirstName + " " + newLastName);
                 alert('Zmiany zostały zapisane!');
                 location.reload();
             } else {

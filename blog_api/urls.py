@@ -9,7 +9,7 @@ urlpatterns = [
     path('search', SearchView.as_view(), name='search'),  ## Wyszukiwanie
 
     # Dla zalogowanych użytkowników
-    path('register', UserRegistrationView.as_view(), name='register'),  # Rejestracja
+    path('register', UserRegistrationView.as_view(), name='register'),  ## Rejestracja
     path('login', UserLoginView.as_view(), name='login'),  ## Logowanie
     path('logout', UserLogoutView.as_view(), name='logout'),  # Wylogowanie
     path('posts/create', CreateBlogPostView.as_view(), name='create-post'),  ## Tworzenie wpisów

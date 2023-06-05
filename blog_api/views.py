@@ -12,7 +12,6 @@ from django.core.mail import send_mail
 from rest_framework.permissions import AllowAny
 from rest_framework import serializers
 
-
 from .models import *
 
 
@@ -49,7 +48,8 @@ class BlogPostDetailView(View):
                 'content': post.content,
                 'author': post.author.username,
                 'created_at': post.created_at,
-                'image_url': post.image
+                'image_url': post.image,
+                'author_id': post.author.id
             }
             return JsonResponse(post_data)
         except Post.DoesNotExist:
@@ -155,7 +155,8 @@ class UserLoginView(View):
             response = {
                 'message': 'Login successful.',
                 'token': token.key,
-                'user': user.first_name + " " + user.last_name
+                'user': user.first_name + " " + user.last_name,
+                'user_id': user.id
             }
             return JsonResponse(response)
         else:
@@ -196,6 +197,12 @@ class CreateBlogPostView(View):
             return JsonResponse({'error': 'Invalid token'}, status=401)
 
         user = token.user
+
+        if not title or not tags or not content:
+            return JsonResponse({'error': 'All fields must be filled'}, status=400)
+
+        if len(title) > 500 or len(tags) > 500:
+            return JsonResponse({'error': 'Title and tags must not exceed 500 characters'}, status=400)
 
         post = Post(title=title, tags=tags, content=content, author=user, image=image)
         post.save()
@@ -295,6 +302,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'content', 'created_at', 'post', 'author']
 
+
 class DisplayCommentView(APIView):
     permission_classes = [AllowAny]
 
@@ -336,36 +344,57 @@ class CreateCommentView(View):
 
 class UserProfileView(View):
     def get(self, request):
-        user = request.user
+        auth_token = request.META.get('HTTP_AUTHORIZATION', '')
+        token_key = auth_token.split('Token ')[1] if auth_token.startswith('Token ') else ''
+        try:
+            token = Token.objects.get(key=token_key)
+        except Token.DoesNotExist:
+            return JsonResponse({'error': 'Invalid token'}, status=401)
+
+        user = token.user
+
         profile_data = {
             'username': user.username,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'email': user.email,
-            'profile_image': user.profile_image.url if user.profile_image else None
+            'email': user.email
         }
         return JsonResponse(profile_data)
 
     def post(self, request):
-        user = request.user
+        content_type = request.content_type
+        if content_type == 'application/json':
+            data = json.loads(request.body)
+            newUsername = data.get('username')
+            newFirstName = data.get('first_name')
+            newLastName = data.get('last_name')
+            newEmail = data.get('email')
+        elif content_type == 'application/x-www-form-urlencoded':
+            newUsername = request.POST.get('username')
+            newFirstName = request.POST.get('first_name')
+            newLastName = request.POST.get('last_name')
+            newEmail = request.POST.get('email')
+        else:
+            return JsonResponse({'error': 'Unsupported content type'}, status=400)
 
-        password = request.POST.get('password')
-        if password:
-            user.set_password(password)
+        auth_token = request.META.get('HTTP_AUTHORIZATION', '')
+        token_key = auth_token.split('Token ')[1] if auth_token.startswith('Token ') else ''
+        try:
+            token = Token.objects.get(key=token_key)
+        except Token.DoesNotExist:
+            return JsonResponse({'error': 'Invalid token'}, status=401)
 
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        profile_image = request.FILES.get('profile_image')
+        user = token.user
 
-        if first_name:
-            user.first_name = first_name
-        if last_name:
-            user.last_name = last_name
-        if email:
-            user.email = email
-        if profile_image:
-            user.profile_image = profile_image
+        if newUsername != user.username and newUsername:
+            if User.objects.filter(username=newUsername).exclude(id=user.id).exists():
+                return JsonResponse({'error': 'Username already exists'}, status=400)
+        if newFirstName != user.first_name:
+            user.first_name = newFirstName
+        if newLastName != user.last_name:
+            user.last_name = newLastName
+        if newEmail != user.email:
+            user.email = newEmail
 
         user.save()
 

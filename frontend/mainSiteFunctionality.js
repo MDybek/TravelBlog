@@ -122,6 +122,26 @@ function displayPostDetails(postId) {
             postMainSection.appendChild(postImage);
             postMainSection.appendChild(postContent);
 
+            const currentUserId = localStorage.getItem('user_id');
+            if (currentUserId && parseInt(post.author_id) === parseInt(currentUserId)) {
+                const editButton = document.createElement("button");
+                editButton.className = "post-details-edit-button";
+                editButton.textContent = "Edytuj post";
+                editButton.addEventListener("click", () => {
+                    editPost(postId);
+                });
+
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "post-details-delete-button";
+                deleteButton.textContent = "Usuń post";
+                deleteButton.addEventListener("click", () => {
+                    deletePost(postId);
+                });
+
+                postMainSection.appendChild(editButton);
+                postMainSection.appendChild(deleteButton);
+            }
+
             const mainContent = document.querySelector("main");
             mainContent.innerHTML = "";
             postDetailsContainer.appendChild(postMainSection);
@@ -165,6 +185,103 @@ function displayPostDetails(postId) {
                 .catch(error => {
                     console.error("Error while loading comments:", error);
                 });
+        });
+}
+
+
+function deletePost(postId) {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('Brak autoryzacji. Zaloguj się, aby usunąć post.');
+        return;
+    }
+
+    const confirmation = confirm('Czy na pewno chcesz usunąć ten post?');
+
+    if (!confirmation) {
+        return;
+    }
+
+    fetch(`/blog/posts/${postId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Token ${token}`
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                alert('Post został pomyślnie usunięty.');
+                location.reload();
+            } else {
+                response.json().then(data => {
+                    if (data.error === 'Post not found') {
+                        alert('Nie można usunąć postu, ponieważ nie należy on do użytkownika lub nie istnieje.');
+                    } else {
+                        throw new Error('Wystąpił błąd podczas usuwania postu.');
+                    }
+                }).catch(error => {
+                    console.error('Błąd podczas przetwarzania odpowiedzi:', error);
+                });
+            }
+        });
+}
+
+function editPost(postId) {
+    // Pobierz dane postu do edycji
+    fetch(`/blog/posts/${postId}`)
+        .then(response => response.json())
+        .then(post => {
+            // Tworzenie elementów formularza edycji postu
+            const editPostForm = document.createElement('form');
+            editPostForm.className = 'edit-post-form';
+
+            const titleLabel = document.createElement('label');
+            titleLabel.textContent = 'Tytuł:';
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.value = post.title;
+
+            const contentLabel = document.createElement('label');
+            contentLabel.textContent = 'Treść:';
+            const contentTextarea = document.createElement('textarea');
+            contentTextarea.value = post.content;
+
+            const tagsLabel = document.createElement('label');
+            tagsLabel.textContent = 'Tagi:';
+            const tagsInput = document.createElement('input');
+            tagsInput.type = 'text';
+            tagsInput.value = post.tags;
+
+            const submitButton = document.createElement('button');
+            submitButton.textContent = 'Zatwierdź zmiany';
+
+            // Dodaj obsługę zdarzenia submit formularza
+            editPostForm.addEventListener('submit', event => {
+                event.preventDefault();
+                const updatedPost = {
+                    title: titleInput.value,
+                    content: contentTextarea.value,
+                    tags: tagsInput.value
+                };
+                saveEditedPost(postId, updatedPost);
+            });
+
+            editPostForm.appendChild(titleLabel);
+            editPostForm.appendChild(titleInput);
+            editPostForm.appendChild(contentLabel);
+            editPostForm.appendChild(contentTextarea);
+            editPostForm.appendChild(tagsLabel);
+            editPostForm.appendChild(tagsInput);
+            editPostForm.appendChild(submitButton);
+
+            // Wyczyść główny kontener i dodaj formularz edycji postu
+            const mainContent = document.querySelector('main');
+            mainContent.innerHTML = '';
+            mainContent.appendChild(editPostForm);
+        })
+        .catch(error => {
+            console.error('Error while fetching post details:', error);
         });
 }
 
@@ -238,64 +355,11 @@ $('#login-button').click(function () {
 $('.login-form').submit(function (event) {
     event.preventDefault();
 
-    var username = $('#username').val();
-    var password = $('#password').val();
-
-    var data = {
-        username: username,
-        password: password
-    };
-
-    $.ajax({
-        url: '/blog/login',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function (response) {
-            if (response.token) {
-                localStorage.setItem('token', response.token);
-                localStorage.setItem('user', response.user);
-
-                $('#login-button').text(response.user).addClass('logged-in');
-                $('#profile-image').addClass('profile-image-logged');
-                $('.login-form').off('submit');
-
-                $('.login-form input[type="text"]').remove();
-                $('.login-form input[type="password"]').remove();
-                $('.login-form input[type="submit"]').remove();
-
-                $('.login-form').append('<button id="new-post-button">Napisz post</button>');
-                $('.login-form').append('<button id="edit-account-button">Edytuj dane konta</button>');
-                $('.login-form').append('<button id="logout-button">Wyloguj się</button>');
-
-                $('#logout-button').click(function () {
-                    logout();
-                });
-
-                $('#new-post-button').click(function () {
-                    openNewPostPage();
-                });
-
-                $('#edit-account-button').click(function () {
-                    editAccount();
-                });
-
-                alert('Zalogowano pomyślnie!');
-                $('.login-form').toggleClass('close');
-            } else {
-                alert('Błąd logowania. Spróbuj ponownie.');
-            }
-        },
-        error: function (xhr, status, error) {
-            alert('Błąd logowania. Spróbuj ponownie.');
-        }
-    });
-
-    $('#username').val('');
-    $('#password').val('');
-
-    $('.login-form').removeClass('open');
+    if (event.originalEvent.submitter.value === 'SUBMIT') {
+        login();
+    }
 });
+
 
 $(document).ready(function () {
     var user = localStorage.getItem('user');
@@ -325,6 +389,7 @@ $(document).ready(function () {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('user_id');
     $('#login-button').text('LOG IN').removeClass('logged-in');
     $('#profile-image').removeClass('profile-image-logged');
 
@@ -340,9 +405,11 @@ function logout() {
         event.preventDefault();
         login();
     });
+
+    location.reload();
 }
 
-// Funkcja logowania
+
 function login() {
     var username = $('#username').val();
     var password = $('#password').val();
@@ -352,99 +419,243 @@ function login() {
         password: password
     };
 
-    $.ajax({
-        url: '/blog/login',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function (response) {
-            if (response.token) {
-                localStorage.setItem('token', response.token);
-                localStorage.setItem('user', response.user);
+    // Funkcja logująca
+    function performLogin() {
+        $.ajax({
+            url: '/blog/login',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (response) {
+                if (response.token) {
+                    localStorage.setItem('token', response.token);
+                    localStorage.setItem('user', response.user);
+                    localStorage.setItem('user_id', response.user_id);
 
-                $('#login-button').text(response.user).addClass('logged-in');
-                $('#profile-image').addClass('profile-image-logged');
+                    $('#login-button').text(response.user).addClass('logged-in');
+                    $('#profile-image').addClass('profile-image-logged');
 
-                $('.login-form input[type="text"]').remove();
-                $('.login-form input[type="password"]').remove();
-                $('.login-form input[type="submit"]').remove();
+                    $('.login-form input[type="text"]').remove();
+                    $('.login-form input[type="password"]').remove();
+                    $('.login-form input[type="submit"]').remove();
 
-                $('.login-form').append('<button id="new-post-button">Napisz post</button>');
-                $('.login-form').append('<button id="edit-account-button">Edytuj dane konta</button>');
-                $('.login-form').append('<button id="logout-button">Wyloguj się</button>');
+                    $('.login-form').append('<button id="new-post-button">Napisz post</button>');
+                    $('.login-form').append('<button id="edit-account-button">Edytuj dane konta</button>');
+                    $('.login-form').append('<button id="logout-button">Wyloguj się</button>');
 
-                $('#logout-button').click(function () {
-                    logout();
-                });
-
-                alert('Zalogowano pomyślnie!');
-                $('.login-form').toggleClass('close');
-
-            } else {
+                    $('#logout-button').click(function () {
+                        logout();
+                    });
+                    $('.login-form').removeClass('open');
+                    location.reload();
+                    alert('Zalogowano pomyślnie!');
+                } else {
+                    if (response.message === 'Invalid credentials.') {
+                        alert('Niepoprawny login lub hasło. Spróbuj ponownie.');
+                    } else {
+                        alert('Błąd logowania. Spróbuj ponownie.');
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
                 alert('Błąd logowania. Spróbuj ponownie.');
             }
-        },
-        error: function (xhr, status, error) {
-            alert('Błąd logowania. Spróbuj ponownie.');
-        }
-    });
+        });
+    }
+
+    performLogin();
 
     $('#username').val('');
     $('#password').val('');
 }
 
+
 function openNewPostPage() {
-    // Wyczyszczenie zawartości strony poza headerem
-    $('body > :not(header)').remove();
+    var user = localStorage.getItem('user');
+    if (user) {
+        $('.login-form').removeClass('open');
+        $('body > :not(header)').remove();
 
-    // Dodanie pól do tworzenia nowego posta
-    $('body').append('<div class="new-post-page"></div>');
-    $('.new-post-page').append('<input id="post-title" type="text" placeholder="Tytuł">');
-    $('.new-post-page').append('<textarea id="post-content" placeholder="Treść"></textarea>');
-    $('.new-post-page').append('<button id="post-submit">Opublikuj</button>');
+        $('body').append('<div class="new-post-page"></div>');
+        $('.new-post-page').append('<input id="post-title" type="text" placeholder="Tytuł">');
+        $('.new-post-page').append('<input id="post-tags" type="text" placeholder="Tagi">');
+        $('.new-post-page').append('<textarea id="post-content" placeholder="Treść"></textarea>');
+        $('.new-post-page').append('<input id="post-image" type="text" placeholder="Obrazek">');
+        $('.new-post-page').append('<button id="post-submit">Opublikuj</button>');
 
-    // Dodanie obsługi zdarzenia kliknięcia na przycisk "Opublikuj"
-    $('#post-submit').click(function () {
-        createNewPost();
-    });
+        $('#post-submit').click(function () {
+            createNewPost();
+        });
+    } else {
+        alert('Aby napisać post, musisz być zalogowany.');
+    }
 }
 
 function createNewPost() {
     var title = $('#post-title').val();
+    var tags = $('#post-tags').val();
     var content = $('#post-content').val();
+    var image = $('#post-image').val();
 
-    // Wykonanie odpowiednich operacji, np. wysłanie żądania do serwera
+    var token = localStorage.getItem('token');
 
-    // Po zakończeniu tworzenia posta:
-    // Przeładowanie strony lub wykonanie innych odpowiednich operacji
+    if (!title || !tags || !content || !image) {
+        if (!title) {
+            $('#post-title').css('border-color', 'red');
+        }
+        if (!tags) {
+            $('#post-tags').css('border-color', 'red');
+        }
+        if (!content) {
+            $('#post-content').css('border-color', 'red');
+        }
+        if (!image) {
+            $('#post-image').css('border-color', 'red');
+        }
+        alert('Proszę wypełnić wszystkie pola przed opublikowaniem posta.');
+        return;
+    }
 
-    alert('Post został opublikowany!');
+    var data = {
+        title: title,
+        tags: tags,
+        content: content,
+        image: image
+    };
+
+    $.ajax({
+        url: '/blog/posts/create',
+        type: 'POST',
+        data: JSON.stringify(data),
+        headers: {
+            'Authorization': 'Token ' + token,
+            'Content-Type': 'application/json'
+        },
+        success: function (response) {
+            alert('Post został opublikowany!');
+            location.reload();
+        },
+        error: function (xhr, status, error) {
+            alert('Wystąpił błąd podczas publikowania posta. Spróbuj ponownie.');
+        }
+    });
 }
 
+
 function editAccount() {
-    // Wyczyść stronę poza headerem
-    $('body > :not(header)').remove();
+    var user = localStorage.getItem('user');
+    if (user) {
+        $('.login-form').removeClass('open');
+        $('body > :not(header)').remove();
 
-    // Dodaj pola do edycji danych konta
-    $('body').append('<div class="edit-account-page"></div>');
-    $('.edit-account-page').append('<input id="edit-username" type="text" placeholder="Nowa nazwa użytkownika">');
-    $('.edit-account-page').append('<input id="edit-password" type="password" placeholder="Nowe hasło">');
-    $('.edit-account-page').append('<button id="edit-submit">Zapisz zmiany</button>');
+        // Pobierz aktualne dane użytkownika
+        $.ajax({
+            url: '/blog/user/profile',
+            type: 'GET',
+            headers: {
+                'Authorization': 'Token ' + localStorage.getItem('token')
+            },
+            success: function (response) {
+                var username = response.username;
+                var firstName = response.first_name;
+                var lastName = response.last_name;
+                var email = response.email;
 
-    // Dodaj obsługę zdarzenia kliknięcia na przycisk "Zapisz zmiany"
-    $('#edit-submit').click(function () {
-        saveAccountChanges();
-    });
+                $('body').append('<div class="edit-account-page"></div>');
+                $('.edit-account-page').append('<label for="edit-username">Nazwa użytkownika:</label>');
+                $('.edit-account-page').append('<input id="edit-username" type="text" placeholder="Nowa nazwa użytkownika" value="' + username + '">');
+                $('.edit-account-page').append('<label for="edit-firstname">Imię:</label>');
+                $('.edit-account-page').append('<input id="edit-firstname" type="text" placeholder="Nowe imię" value="' + firstName + '">');
+                $('.edit-account-page').append('<label for="edit-lastname">Nazwisko:</label>');
+                $('.edit-account-page').append('<input id="edit-lastname" type="text" placeholder="Nowe nazwisko" value="' + lastName + '">');
+                $('.edit-account-page').append('<label for="edit-email">Email:</label>');
+                $('.edit-account-page').append('<input id="edit-email" type="email" placeholder="Nowy email" value="' + email + '">');
+                $('.edit-account-page').append('<button id="edit-submit">Zapisz zmiany</button>');
+
+                $('#edit-submit').click(function () {
+                    saveAccountChanges();
+                    location.reload();
+                });
+            },
+            error: function (xhr, status, error) {
+                alert('Wystąpił błąd podczas pobierania danych użytkownika. Spróbuj ponownie.');
+            }
+        });
+    } else {
+        location.reload();
+        alert('Aby zmienić dane konta, musisz być zalogowany.');
+    }
 }
 
 function saveAccountChanges() {
     var newUsername = $('#edit-username').val();
-    var newPassword = $('#edit-password').val();
+    var newFirstName = $('#edit-firstname').val();
+    var newLastName = $('#edit-lastname').val();
+    var newEmail = $('#edit-email').val();
 
-    // Wykonaj odpowiednie operacje, np. wysyłkę żądania do serwera
+    var isInvalid = false;
 
-    // Po zakończeniu zapisywania zmian:
-    // Przeładuj stronę lub wykonaj inne odpowiednie operacje
+    if (newUsername === '' || newUsername.length > 200) {
+        $('#edit-username').css('border-color', 'red');
+        isInvalid = true;
+    } else {
+        $('#edit-username').css('border-color', '');
+    }
 
-    alert('Zmiany zostały zapisane!');
+    if (newFirstName === '' || newFirstName.length > 200) {
+        $('#edit-firstname').css('border-color', 'red');
+        isInvalid = true;
+    } else {
+        $('#edit-firstname').css('border-color', '');
+    }
+
+    if (newLastName === '' || newLastName.length > 200) {
+        $('#edit-lastname').css('border-color', 'red');
+        isInvalid = true;
+    } else {
+        $('#edit-lastname').css('border-color', '');
+    }
+
+    if (newEmail === '' || newEmail.length > 200) {
+        $('#edit-email').css('border-color', 'red');
+        isInvalid = true;
+    } else {
+        $('#edit-email').css('border-color', '');
+    }
+
+    if (isInvalid) {
+        alert('Uzupełnij pola poprawnie!');
+        return;
+    }
+
+    var data = {
+        username: newUsername,
+        first_name: newFirstName,
+        last_name: newLastName,
+        email: newEmail
+    };
+
+    $.ajax({
+        url: '/blog/user/profile',
+        type: 'POST',
+        data: data,
+        headers: {
+            'Authorization': 'Token ' + localStorage.getItem('token'),
+            'Content-Type': 'application/json'
+        },
+        success: function (response) {
+            if (response.message === "User profile updated successfully") {
+                localStorage.setItem('user', data.first_name + " " + data.last_name);
+                alert('Zmiany zostały zapisane!');
+                // location.reload();
+            } else {
+                // alert('Nieznany komunikat odpowiedzi. Spróbuj ponownie.');
+            }
+        },
+        error: function (xhr, status, error) {
+            // alert('Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie.');
+        }
+    });
 }
+
+

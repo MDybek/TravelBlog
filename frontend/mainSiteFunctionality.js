@@ -74,6 +74,7 @@ function fetchPostDetails(postId) {
 }
 
 function displayPostDetails(postId) {
+    $('.login-form').removeClass('open');
     const postDetailsContainer = document.createElement("section");
     postDetailsContainer.className = "post-details";
 
@@ -767,6 +768,11 @@ registerButton.addEventListener('click', () => {
 
     const formContainer = document.createElement('div');
     formContainer.className = 'register-form-container';
+
+    const fromLabel = document.createElement('label');
+    fromLabel.textContent = 'Formularz rejestracyjny';
+    fromLabel.className = 'form-title-label';
+    formContainer.appendChild(fromLabel);
 
     const usernameInput = document.createElement('input');
     usernameInput.setAttribute('type', 'text');

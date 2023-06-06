@@ -110,6 +110,8 @@ header {
     margin: 10px;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: 0.4s transform;
+    cursor: pointer;
 }
 
 .tile:hover {
@@ -283,6 +285,7 @@ footer {
 
 * {
     box-sizing: border-box;
+    word-wrap: break-word;
 }
 
 .login-wrapper {
@@ -533,10 +536,12 @@ button.logged-in {
 }
 
 .post-details-edit-button {
+    width: 10vw;
     margin-right: 10px;
 }
 
 .post-details-delete-button {
+        width: 10vw;
     margin-left: 10px;
 }
 
@@ -685,4 +690,11 @@ button.logged-in {
     text-decoration: none;
     border: none;
     box-shadow: 0 4px 0 #3c5050;
+}
+
+.form-title-label {
+    margin-bottom: 5px;
+    font-family: "AvenirLTStd-Book", sans-serif;
+    text-align: center;
+    width: 38vw;
 }
